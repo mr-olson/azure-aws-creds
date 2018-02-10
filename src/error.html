@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Error Page</title>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style>
+      div.form {
+        margin:10px;
+      }
+    </style>
+
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+    <script type='text/javascript'>
+      window.$ = window.jQuery = require('jquery');
+    </script>
+    <script>if (window.module) module = window.module;</script>
+
+    <script type='text/javascript'>
+      // Connect ipcRenderer to the page, so that we can send events back to the main process
+      window.ipcRenderer = require('electron').ipcRenderer;
+
+      $(document).ready(function() {
+        var electron = require('electron');
+        var currentWindow = electron.remote.getCurrentWindow();
+
+        if (currentWindow._Error) {
+          $("#error").text(currentWindow._Error.message);
+        }
+
+        $("#btnHome").click( function() {
+          ipcRenderer.send("show-stats");
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <br/>
+    <div class="container" style="text-align: center;">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="error-template">
+                    <h1>
+                        Oops!</h1>
+                    <br/>
+                    <div class="error-details">
+                        Sorry, an error has occured, <div id="error"/>
+                    </div>
+                    <br/>
+                    <div class="error-actions">
+                        <button type="button" id="btnHome" class="btn btn-primary btn-sm">Home</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </body>
+</html>

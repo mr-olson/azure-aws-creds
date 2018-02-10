@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Status</title>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../node_modules/datatables.net-dt/css/jquery.dataTables.css">
+    <style>
+      .expiring {
+        color: red;
+      }
+    </style>
+
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+    <script>
+      window.$ = window.jQuery = require('jquery');
+      var dt = require("datatables.net")();
+      // Couldn't quite load style dynamically for some reason...
+      //var dtdt = require("datatables.net-bs4")();
+      var ctdn = require("jquery-countdown");
+    </script>
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script>if (window.module) module = window.module;</script>
+
+    <script type='text/javascript'>
+      // Connect ipcRenderer to the page, so that we can send events back to the main process
+      window.ipcRenderer = require('electron').ipcRenderer;
+
+      $(document).ready(function() {
+        var electron = require('electron');
+        var currentWindow = electron.remote.getCurrentWindow();
+
+        $("#profiles").on("draw.dt", function() { countDown() })
+          .DataTable( {
+          data: currentWindow._Profiles,
+          columns: [
+            {
+              title: "Profile",
+              data: "profile"
+            },
+            {
+              title: "Expiration",
+              data: "active",
+              render: function ( data, type, row, meta ) {
+                if (data)
+                  return "<span data-countdown='" + row.expiration.getTime() + "'></span>";
+                return row.configured ? "inactive" : "n/a";
+              }
+            },
+            {
+              title: "",
+              data: "configured",
+              render: function ( data, type, row, meta ) {
+                let links = "";
+                if (data) {
+                  var title = !row.active ? "Log In" : "Refresh";
+                  links = '<a href="#" onClick="profileSelected(\'' + row.profile + '\');">' + title + '</a> | ';
+                }
+                // Always show the Configure link
+                links += '<a href="#" onClick="editProfile(\'' + row.profile + '\');">Configure</a>';
+                return links;
+              }
+            }
+          ]
+        });
+      });
+
+      function profileSelected(profile) {
+        console.log("profileSelected->");
+        ipcRenderer.send('azure-login', profile);
+      }
+      function editProfile(profile) {
+        console.log("editProfile->");
+        ipcRenderer.send('edit-profile', profile);
+      }
+
+      function countDown() {
+        $('[data-countdown]').each(function() {
+          var $this = $(this);
+          var expirationTime = $(this).data('countdown');
+          $this.countdown(expirationTime, function(event) {
+            $this.html(event.strftime('%H:%M:%S'));
+            countdownStyle($this, event.offset.totalSeconds);
+          });
+        });
+      }
+
+      function countdownStyle(elem, seconds) {
+        if (seconds < 300)
+          elem.addClass("expiring");
+        else
+          elem.removeClass("expiring");
+      }
+    </script>
+  </head>
+  <body style="padding: 1em;">
+    <table id="profiles" class="display compact" width="100%"></table>
+  </body>
+</html>

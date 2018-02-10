@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Choose an AWS Role...</title>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+    <script type='text/javascript'>
+      window.$ = window.jQuery = require('jquery');
+    </script>
+    <script>if (window.module) module = window.module;</script>
+
+    <script type='text/javascript'>
+      // Connect ipcRenderer to the page, so that we can send events back to the main process
+      window.ipcRenderer = require('electron').ipcRenderer;
+
+      $(document).ready(function() {
+        var electron = require('electron');
+        var currentWindow = electron.remote.getCurrentWindow();
+
+        $('#profile').prop("value", currentWindow.currentProfile);
+
+        var $select = $('#role-select');
+        $('<option />').html("-- Choose Role --").appendTo($select);
+        $.each(currentWindow.rolesMap, function(key, value) {
+          var group = $('<optgroup label="' + key + '" />');
+          $.each(value, function() {
+            // TODO: The account # prefix on display should probably be an optional approach,
+            // for users that don't have several same-named roles across different accounts
+            var display = key + "->" + this.roleName
+            var opt = $('<option />').html(display).val(this.roleArn);
+            opt.data(this);
+            if (currentWindow.defaultRole == this.roleArn)
+              opt.attr("selected", "selected");
+            opt.appendTo(group);
+          });
+          group.appendTo($select);
+        });
+      });
+
+      function roleSelected() {
+        console.log("roleChoice->");
+        let evt = $('#role-select option:selected').data();
+        if (!evt.roleArn) {
+          console.log("no role selected");
+          alert("Please choose a role");
+          return;
+        }
+        evt.rememberRole = $('#set_default').prop("checked");
+        ipcRenderer.send('role-choice', evt);
+      }
+    </script>
+  </head>
+  <body style="padding: 1em;">
+    <div class="form">
+      <form id="settingsForm">
+        <div class="form-group">
+          <label for="role-select">Profile</label>
+          <input type="text" id="profile" value="" readonly="true" />
+        </div>
+        <div class="form-group">
+          <label for="role-select">Role</label>
+          <select class="selectpicker" id="role-select"></select>
+        </div>
+        <div class="form-group">
+          <input type="checkbox" id="set_default" name="set_default" value="y" />
+          <label for="set_default">set as default role for this profile</label>
+        </div>
+        <button type="button"class="btn btn-primary" onclick="roleSelected()">Assume Role</button>
+      </form>
+    </div>
+  </body>
+</html>

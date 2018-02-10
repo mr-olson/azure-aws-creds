@@ -1,0 +1,19 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Compiled binary addons (http://nodejs.org/api/addons.html)
+build/Release
+
+# Dependency directories
+node_modules/
+
+# Builds
+dist/
+
+# Typescript v1 declaration files
+typings/
+
+# Output of 'npm pack'
+*.tgz

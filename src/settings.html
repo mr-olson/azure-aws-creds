@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Settings...</title>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style>
+      div.form {
+        margin:10px;
+      }
+    </style>
+
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+    <script type='text/javascript'>
+      window.$ = window.jQuery = require('jquery');
+    </script>
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <script>if (window.module) module = window.module;</script>
+
+    <script type='text/javascript'>
+      // Connect ipcRenderer to the page, so that we can send events back to the main process
+      window.ipcRenderer = require('electron').ipcRenderer;
+
+      $(document).ready(function() {
+        var electron = require('electron');
+        var currentWindow = electron.remote.getCurrentWindow();
+
+        if (currentWindow._EditProfile) {
+          $("#profile").val(currentWindow._EditProfile.profile);
+          // Disallow changing the profile name for existing entries
+          $("#profile").prop('readonly', true);
+          $("#region").val(currentWindow._EditProfile.region);
+          $("#azure_tenant_id").val(currentWindow._EditProfile.azure_tenant_id);
+          $("#azure_app_id_uri").val(currentWindow._EditProfile.azure_app_id_uri);
+          $("#azure_default_role_arn").val(currentWindow._EditProfile.azure_default_role_arn);
+        }
+
+        $("#settingsForm").submit(function( event ) {
+          event.preventDefault();
+          // Light required-field validation
+          if (!$("#profile").val() ||
+            !$("#azure_tenant_id").val() ||
+            !$("#azure_app_id_uri").val()) {
+              alert("Profile, Azure Tenant ID and App URI are required");
+              return;
+          }
+          ipcRenderer.send("save-profile", objectifyForm($("#settingsForm").serializeArray()));
+        });
+
+        $("#save_log_in").click(function( event ) {
+          $('#log_in').prop('checked', true);
+        });
+
+        $("#cxl").click(function( event ) {
+          ipcRenderer.send("show-stats");
+        });
+
+        function objectifyForm(formArray) { //serialize data function
+          var returnArray = {};
+          for (var i = 0; i < formArray.length; i++){
+            returnArray[formArray[i]['name']] = formArray[i]['value'];
+          }
+          return returnArray;
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <br/>
+    <div class="form">
+      <form id="settingsForm">
+        <div class="form-group">
+          <label for="profile">Profile</label>
+          <input type="text" class="form-control" id="profile" name="profile" aria-describedby="profileHelp" placeholder="AWS Profile">
+          <small id="profileHelp" class="form-text text-muted">AWS profile name</small>
+        </div>
+        <div class="form-group">
+          <label for="region">Default Region</label>
+          <input type="text" class="form-control" id="region" name="region" aria-describedby="regionHelp" placeholder="Default AWS region">
+          <small id="regionHelp" class="form-text text-muted">[optional - e.g. us-east-1, us-west-2]</small>
+        </div>
+        <div class="form-group">
+          <label for="azure_tenant_id">Tenant ID</label>
+          <input type="text" class="form-control" id="azure_tenant_id" name="azure_tenant_id" aria-describedby="azure_tenant_idHelp" placeholder="AzureAD Tenant Id">
+          <small id="azure_tenant_idHelp" class="form-text text-muted">Azure Tenant Id GUID</small>
+        </div>
+        <div class="form-group">
+          <label for="azure_app_id_uri">App ID URI</label>
+          <input type="text" class="form-control" id="azure_app_id_uri" name="azure_app_id_uri" aria-describedby="azure_app_id_uriHelp" placeholder="AzureAD App ID">
+          <small id="azure_app_id_uriHelp" class="form-text text-muted">Azure App ID URI</small>
+        </div>
+        <div class="form-group">
+          <label for="azure_default_role_arn">Default Role ARN</label>
+          <input type="text" class="form-control" id="azure_default_role_arn" name="azure_default_role_arn" aria-describedby="azure_default_role_arnHelp" placeholder="Default role to select">
+          <small id="azure_default_role_arnHelp" class="form-text text-muted">[optional, e.g. arn:aws:iam::000000000000:role/MyAWSRole]</small>
+        </div>
+        <input type="checkbox" style="display: none;" name="log_in" value="y" id="log_in" />
+        <button id="save" type="submit" class="btn btn-primary">Save</button>
+        <button id="save_log_in" type="submit" class="btn btn-primary">Save &amp; Log In</button>
+        <button type="button" class="btn btn-primary" id="cxl">Cancel</button>
+      </form>
+    </div>
+  </body>
+</html>
