@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Azure Active Directory Login</title>
+    <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    webview {
+      border: none;
+      height: 100vh; /* Viewport-relative units */
+      width: 100vw;
+    }
+    webview.hidden {
+      visibility: hidden;
+    }
+    </style>
+
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+    <script>
+      window.$ = window.jQuery = require('jquery');
+      const debug = require('electron').remote.getGlobal('main_debug');
+      onload = () => {
+        const webview = document.querySelector("webview");
+        webview.addEventListener("ipc-message", function listener(event) {
+          if (event.channel == "saml_token_found") {
+            debug("Sending SAML token to main process");
+            const ipc = require('electron').ipcRenderer;
+            console.log("samlTokenFound->");
+            ipc.send('saml_token_found', event.args[0]);
+            // Azure page sometimes fires the onload twice, only listen to the first one
+            webview.removeEventListener("ipc-message", listener);
+            // Hide the webview because we're transitioning to our role picker instead of AWS' native one
+            webview.className = "hidden";
+          }
+        });
+      }
+    </script>
+    <script>if (window.module) module = window.module;</script>
+  </head>
+  <body>
+    <webview id="login" preload="./azure_preload.js"></webview>
+  </body>
+</html>

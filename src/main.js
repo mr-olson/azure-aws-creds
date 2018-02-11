@@ -2,6 +2,8 @@
 
 const electron = require('electron');
 const debug = require('debug')('azure-aws-creds');
+// Export debug object for common use in renderers
+global.main_debug = debug;
 if (debug.enabled) {
   require('electron-debug')({ showDevTools: "undocked" });
 }
@@ -89,6 +91,21 @@ ipcMain.on("save-profile", (event, data) => {
     login(data.profile);
   else
     showStats();
+});
+
+ipcMain.on('saml_token_found', (event, data) => {
+  //debug("ipcMain SAML: " + data);
+  const rolesMap = parseSAMLToken(data);
+
+  if (rolesMap.length === 0) {
+    showError({ message: "SAML Response is missing 'https://aws.amazon.com/SAML/Attributes/Role' value(s)" });
+    return;
+  }
+
+  mainWindow.currentProfile = _CurrentProfile;
+  mainWindow.rolesMap = rolesMap;
+  mainWindow.defaultRole = _DefaultRole;
+  mainWindow.loadURL('file://' + __dirname + '/roleChoice.html');
 });
 
 // Event handler for role-choice after successful login
@@ -275,7 +292,10 @@ function login(profile) {
 
   // Current profile being logged in to
   _CurrentProfile = profile;
-  mainWindow.loadURL(url);
+  debug("loading Azure page");
+  // azure.html will load the AzureAD site in a webview to isolate it from our Node-integrated windows (per Electron 1.8.x warning/best practices)
+  mainWindow.loadURL('file://' + __dirname + '/azure.html');
+  mainWindow.webContents.executeJavaScript("$('#login')[0].src = '" + url + "'");
 }
 
 function createWindow(opts) {
@@ -325,67 +345,48 @@ function createWindow(opts) {
       // Dereference the window object
       mainWindow = null;
     });
-
-    let samlRegx = new RegExp(/name="SAMLResponse"/, "i");
-    mainWindow.webContents.on('dom-ready', (event) => {
-
-      mainWindow.webContents.executeJavaScript("document.documentElement.innerHTML", r => {
-        if (samlRegx.test(r)) {
-          let jscript = "document.querySelector('input[name=\"SAMLResponse\"]').value";
-          mainWindow.webContents.executeJavaScript(jscript, r => {
-
-            let samlResponse = r;
-
-            const samlText = new Buffer(samlResponse, 'base64').toString("ascii");
-            const saml = cheerio.load(samlText, { xmlMode: true });
-
-            const roles = saml("Attribute[Name='https://aws.amazon.com/SAML/Attributes/Role']>AttributeValue").map(function () {
-              const roleAndPrincipal = saml(this).text();
-              const parts = roleAndPrincipal.split(",");
-
-              // Role / Principal claims may be in either order
-              const [roleIdx, principalIdx] = parts[0].indexOf(":role/") >= 0 ? [0, 1] : [1, 0];
-              const roleArn = parts[roleIdx].trim();
-              const principalArn = parts[principalIdx].trim();
-              return { roleArn, principalArn, samlResponse };
-            }).get();
-
-            // Sort by account ID (effectively)
-            // TODO: allow for account aliases & sort by alias string instead
-            roles.sort(function (a, b) {
-              return a.principalArn.localeCompare(b.principalArn);
-            });
-
-            let rolesMap = {};
-            for (let i = 0; i < roles.length; i++) {
-              const account = roles[i].roleArn.split(":")[4];
-              if (!(account in rolesMap))
-                rolesMap[account] = Array();
-              rolesMap[account].push({
-                roleArn: roles[i].roleArn,
-                roleName: roles[i].roleArn.split("/")[1],
-                principalArn: roles[i].principalArn,
-                samlResponse: roles[i].samlResponse
-              });
-            }
-
-            if (roles.length === 0) {
-              showError({ message: "SAML Response is missing 'https://aws.amazon.com/SAML/Attributes/Role' value(s)" });
-              return;
-            }
-
-            mainWindow.currentProfile = _CurrentProfile;
-            mainWindow.rolesMap = rolesMap;
-            mainWindow.defaultRole = _DefaultRole;
-            mainWindow.loadURL('file://' + __dirname + '/roleChoice.html');
-          });
-        }
-      });
-    });
   }
   showStats();
 }
 
+function parseSAMLToken (samlResponse) {
+  const samlText = new Buffer(samlResponse, 'base64').toString("ascii");
+  const saml = cheerio.load(samlText, { xmlMode: true });
+
+  const roles = saml("Attribute[Name='https://aws.amazon.com/SAML/Attributes/Role']>AttributeValue").map(function () {
+    const roleAndPrincipal = saml(this).text();
+    const parts = roleAndPrincipal.split(",");
+
+    // Role / Principal claims may be in either order
+    const [roleIdx, principalIdx] = parts[0].indexOf(":role/") >= 0 ? [0, 1] : [1, 0];
+    const roleArn = parts[roleIdx].trim();
+    const principalArn = parts[principalIdx].trim();
+    return { roleArn, principalArn, samlResponse };
+  }).get();
+
+  // Sort by account ID (effectively)
+  // TODO: allow for account aliases & sort by alias string instead
+  roles.sort(function (a, b) {
+    return a.principalArn.localeCompare(b.principalArn);
+  });
+
+  let rolesMap = {};
+  for (let i = 0; i < roles.length; i++) {
+    const account = roles[i].roleArn.split(":")[4];
+    if (!(account in rolesMap))
+      rolesMap[account] = Array();
+    rolesMap[account].push({
+      roleArn: roles[i].roleArn,
+      roleName: roles[i].roleArn.split("/")[1],
+      principalArn: roles[i].principalArn,
+      samlResponse: roles[i].samlResponse
+    });
+  }
+  return rolesMap;
+}
+/*
+ * AWS profile functions
+ */
 function awsDir() {
   let home = process.env.HOME ? process.env.HOME : process.env.USERPROFILE;
   let awsDirectory = path.join(home, ".aws");
