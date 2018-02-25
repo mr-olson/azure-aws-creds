@@ -1,6 +1,6 @@
 {
   "name": "azure-aws-creds",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Electron app to update AWS credentials via Azure AD federation",
   "main": "src/main.js",
   "scripts": {
@@ -39,9 +39,20 @@
     }
   },
   "repository": "https://github.com/mr-olson/azure-aws-creds",
-  "keywords": [],
+  "keywords": [
+    "Azure Active Directory",
+    "AWS",
+    "SAML",
+    "SSO",
+    "CLI",
+    "credentials"
+  ],
   "author": "Mark Olson",
   "license": "MIT",
+  "homepage": "https://github.com/mr-olson/azure-aws-creds",
+  "bugs": {
+    "url": "https://github.com/mr-olson/azure-aws-creds/issues"
+  },
   "devDependencies": {
     "cross-env": "^5.1.1",
     "devtron": "^1.4.0",
