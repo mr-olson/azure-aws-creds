@@ -3,6 +3,7 @@
   "version": "0.5.1",
   "description": "Electron app to update AWS credentials via Azure AD federation",
   "main": "src/main.js",
+  "bin": "./src/main.js",
   "scripts": {
     "start": "npm install && electron ./src/main.js",
     "debug": "cross-env DEBUG=azure-aws-creds electron src/main.js",
@@ -54,18 +55,18 @@
     "url": "https://github.com/mr-olson/azure-aws-creds/issues"
   },
   "devDependencies": {
-    "cross-env": "^5.1.1",
+    "cross-env": "^5.1.4",
     "devtron": "^1.4.0",
-    "electron": "1.8.2",
+    "electron": "^1.8.4",
     "electron-builder": "^19.56.0",
-    "electron-builder-lib": "^20.0.3",
+    "electron-builder-lib": "^20.8.2",
     "electron-debug": "^1.5.0",
-    "electron-packager": "^11.0.0",
+    "electron-packager": "^11.2.0",
     "webpack": "^3.11.0",
     "webpack-node-externals": "^1.6.0"
   },
   "dependencies": {
-    "aws-sdk": "^2.192.0",
+    "aws-sdk": "^2.215.1",
     "bootstrap": "^4.0.0",
     "cheerio": "^1.0.0-rc.2",
     "datatables.net": "^1.10.16",
@@ -76,8 +77,8 @@
     "jquery": "^3.3.1",
     "jquery-countdown": "^2.2.0",
     "jwt-decode": "^2.2.0",
-    "popper.js": "^1.12.9",
-    "source-map-support": "^0.5.3",
+    "popper.js": "^1.14.1",
+    "source-map-support": "^0.5.4",
     "uuid": "^3.2.1"
   }
 }
