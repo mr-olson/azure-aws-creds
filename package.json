@@ -1,6 +1,6 @@
 {
   "name": "azure-aws-creds",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Electron app to update AWS credentials via Azure AD federation",
   "main": "src/main.js",
   "bin": "./src/main.js",
