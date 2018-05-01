@@ -35,6 +35,7 @@
           $("#azure_tenant_id").val(currentWindow._EditProfile.azure_tenant_id);
           $("#azure_app_id_uri").val(currentWindow._EditProfile.azure_app_id_uri);
           $("#azure_default_role_arn").val(currentWindow._EditProfile.azure_default_role_arn);
+          $("#azure_session_duration_minutes").val(currentWindow._EditProfile.azure_session_duration_minutes);
         }
 
         $("#settingsForm").submit(function( event ) {
@@ -68,33 +69,49 @@
     </script>
   </head>
   <body>
-    <br/>
     <div class="form">
       <form id="settingsForm">
-        <div class="form-group">
-          <label for="profile">Profile</label>
+        <div class="form-group row">
+          <label for="profile" class="col-sm-4 col-form-label">Profile Name</label>
+          <div class="col-sm-8">
           <input type="text" class="form-control" id="profile" name="profile" aria-describedby="profileHelp" placeholder="AWS Profile">
           <small id="profileHelp" class="form-text text-muted">AWS profile name</small>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="region">Default Region</label>
-          <input type="text" class="form-control" id="region" name="region" aria-describedby="regionHelp" placeholder="Default AWS region">
-          <small id="regionHelp" class="form-text text-muted">[optional - e.g. us-east-1, us-west-2]</small>
+        <div class="form-group row">
+          <label for="region" class="col-sm-4 col-form-label">Default Region</label>
+          <div class="col-sm-8">
+            <input type="text" class="form-control" id="region" name="region" aria-describedby="regionHelp" placeholder="Default AWS region">
+            <small id="regionHelp" class="form-text text-muted">[optional - e.g. us-east-1, us-west-2]</small>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="azure_tenant_id">Tenant ID</label>
-          <input type="text" class="form-control" id="azure_tenant_id" name="azure_tenant_id" aria-describedby="azure_tenant_idHelp" placeholder="AzureAD Tenant Id">
-          <small id="azure_tenant_idHelp" class="form-text text-muted">Azure Tenant Id GUID</small>
+        <div class="form-group row">
+          <label for="azure_tenant_id" class="col-sm-4 col-form-label">Tenant ID</label>
+          <div class="col-sm-8">
+            <input type="text" class="form-control" id="azure_tenant_id" name="azure_tenant_id" aria-describedby="azure_tenant_idHelp" placeholder="AzureAD Tenant Id">
+            <small id="azure_tenant_idHelp" class="form-text text-muted">Azure Tenant Id GUID</small>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="azure_app_id_uri">App ID URI</label>
-          <input type="text" class="form-control" id="azure_app_id_uri" name="azure_app_id_uri" aria-describedby="azure_app_id_uriHelp" placeholder="AzureAD App ID">
-          <small id="azure_app_id_uriHelp" class="form-text text-muted">Azure App ID URI</small>
+        <div class="form-group row">
+          <label for="azure_app_id_uri" class="col-sm-4 col-form-label">App ID URI</label>
+          <div class="col-sm-8">
+            <input type="text" class="form-control" id="azure_app_id_uri" name="azure_app_id_uri" aria-describedby="azure_app_id_uriHelp" placeholder="AzureAD App ID">
+            <small id="azure_app_id_uriHelp" class="form-text text-muted">Azure App ID URI</small>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="azure_default_role_arn">Default Role ARN</label>
-          <input type="text" class="form-control" id="azure_default_role_arn" name="azure_default_role_arn" aria-describedby="azure_default_role_arnHelp" placeholder="Default role to select">
-          <small id="azure_default_role_arnHelp" class="form-text text-muted">[optional, e.g. arn:aws:iam::000000000000:role/MyAWSRole]</small>
+        <div class="form-group row">
+          <label for="azure_default_role_arn" class="col-sm-4 col-form-label">Default Role ARN</label>
+          <div class="col-sm-8">
+            <input type="text" class="form-control" id="azure_default_role_arn" name="azure_default_role_arn" aria-describedby="azure_default_role_arnHelp" placeholder="Default role to select">
+            <small id="azure_default_role_arnHelp" class="form-text text-muted">[optional, e.g. arn:aws:iam::000000000000:role/MyAWSRole]</small>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="azure_session_duration_minutes" class="col-sm-4 col-form-label">Session Duration</label>
+          <div class="col-sm-8">
+            <input type="text" class="form-control" id="azure_session_duration_minutes" name="azure_session_duration_minutes" aria-describedby="azure_session_duration_minutesHelp" placeholder="Minutes to stay logged in to role">
+            <small id="azure_session_duration_minutesHelp" class="form-text text-muted">[optional, # of minutes, defaults to 60]</small>
+          </div>
         </div>
         <input type="checkbox" style="display: none;" name="log_in" value="y" id="log_in" />
         <button id="save" type="submit" class="btn btn-primary">Save</button>

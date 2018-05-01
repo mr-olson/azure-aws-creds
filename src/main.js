@@ -110,8 +110,10 @@ ipcMain.on('saml_token_found', (event, data) => {
 
 // Event handler for role-choice after successful login
 ipcMain.on("role-choice", (event, role) => {
+  let p = getAwsProfile(_CurrentProfile);
+  let sessionSeconds = p.azure_session_duration_minutes * 60;
   let params = {
-    DurationSeconds: 3600,
+    DurationSeconds: sessionSeconds,
     PrincipalArn: role.principalArn,
     RoleArn: role.roleArn,
     SAMLAssertion: role.samlResponse
@@ -135,7 +137,6 @@ ipcMain.on("role-choice", (event, role) => {
 
       // Set the selected role as the default for this profile, if desired
       if (role.rememberRole) {
-        let p = getAwsProfile(_CurrentProfile);
         p.azure_default_role_arn = role.roleArn;
         saveProfile(p);
       }
@@ -411,12 +412,25 @@ function getAwsProfile(profile) {
   if (!(profileKey in awsConfig))
     throw "Profile " + profile + "not found in " + awsConfig;
 
+  let session = 60;
+  if ("azure_session_duration_minutes" in awsConfig[profileKey]) {
+    session = parseInt(awsConfig[profileKey].azure_session_duration_minutes);
+    // https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRoleWithSAML.html#API_AssumeRoleWithSAML_RequestParameters
+    // If not numeric, or exceeding 12 hours (current AWS max), reset to default
+    if (isNaN(session) || session > 720)
+      session = 60;
+    // AWS min session is 15 minutes
+    if (session < 15)
+      session = 15;
+  }
+
   return {
     profile: profile,
     region: awsConfig[profileKey].region,
     azure_app_id_uri: awsConfig[profileKey].azure_app_id_uri,
     azure_tenant_id: awsConfig[profileKey].azure_tenant_id,
-    azure_default_role_arn: awsConfig[profileKey].azure_default_role_arn
+    azure_default_role_arn: awsConfig[profileKey].azure_default_role_arn,
+    azure_session_duration_minutes: session
   }
 }
 
@@ -435,6 +449,7 @@ function saveProfile(data) {
   awsConfig[profileKey].azure_tenant_id = data.azure_tenant_id;
   awsConfig[profileKey].azure_app_id_uri = data.azure_app_id_uri;
   awsConfig[profileKey].azure_default_role_arn = data.azure_default_role_arn;
+  awsConfig[profileKey].azure_session_duration_minutes = data.azure_session_duration_minutes;
 
   fs.writeFileSync(configPath, ini.stringify(awsConfig), "utf8");
 }
