@@ -1,6 +1,6 @@
 {
   "name": "azure-aws-creds",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "Electron app to update AWS credentials via Azure AD federation",
   "main": "src/main.js",
   "bin": "./src/main.js",
@@ -57,17 +57,15 @@
   "devDependencies": {
     "cross-env": "^5.1.4",
     "devtron": "^1.4.0",
-    "electron": "^1.8.4",
-    "electron-builder": "^19.56.0",
-    "electron-builder-lib": "^20.8.2",
+    "electron": "^1.8.6",
+    "electron-builder": "^20.11.1",
     "electron-debug": "^1.5.0",
-    "electron-packager": "^11.2.0",
     "webpack": "^3.11.0",
-    "webpack-node-externals": "^1.6.0"
+    "webpack-node-externals": "^1.7.2"
   },
   "dependencies": {
-    "aws-sdk": "^2.215.1",
-    "bootstrap": "^4.0.0",
+    "aws-sdk": "^2.230.1",
+    "bootstrap": "^4.1.1",
     "cheerio": "^1.0.0-rc.2",
     "datatables.net": "^1.10.16",
     "datatables.net-bs4": "^1.10.16",
@@ -77,8 +75,8 @@
     "jquery": "^3.3.1",
     "jquery-countdown": "^2.2.0",
     "jwt-decode": "^2.2.0",
-    "popper.js": "^1.14.1",
-    "source-map-support": "^0.5.4",
+    "popper.js": "^1.14.3",
+    "source-map-support": "^0.5.5",
     "uuid": "^3.2.1"
   }
 }
