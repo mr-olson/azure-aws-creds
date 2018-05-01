@@ -22,12 +22,20 @@
       window.ipcRenderer = require('electron').ipcRenderer;
 
       $(document).ready(function() {
+        let msg;
         var electron = require('electron');
         var currentWindow = electron.remote.getCurrentWindow();
 
-        if (currentWindow._Error) {
-          $("#error").text(currentWindow._Error.message);
+        if (!currentWindow._Error)
+          msg = "Unknown error: No additional error information was included."
+        else {
+          msg = currentWindow._Error.message;
+          // Bit of message substitution for
+          if (msg == "The requested DurationSeconds exceeds the MaxSessionDuration set for this role.")
+            msg = "The configured Session Duration exceeds the maximum allowed for this role by the account administrator. " +
+              "Reduce the duration set in this tool or increase the role's configured 'Maximum CLI/API session duration' in AWS."
         }
+        $("#error").text(msg);
 
         $("#btnHome").click( function() {
           ipcRenderer.send("show-stats");
@@ -39,17 +47,17 @@
     <br/>
     <div class="container" style="text-align: center;">
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-20">
                 <div class="error-template">
-                    <h1>
-                        Oops!</h1>
-                    <br/>
+                    <h1>Oops!</h1>
                     <div class="error-details">
-                        Sorry, an error has occured, <div id="error"/>
+                        Sorry, an error has occured:<br /><br />
+
+                        <div id="error"/>
                     </div>
                     <br/>
                     <div class="error-actions">
-                        <button type="button" id="btnHome" class="btn btn-primary btn-sm">Home</button>
+                        <button type="button" id="btnHome" class="btn btn-primary">Home</button>
                     </div>
                 </div>
             </div>
