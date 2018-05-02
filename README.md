@@ -18,14 +18,16 @@ To [configure the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-
 To work with multiple roles and/or accounts, you can add and configure profiles using this tool, or [configure multiple, named profiles](https://docs.aws.amazon.com/cli/latest/userguide/cli-multiple-profiles.html) with the AWS CLI, by running `aws --configure --profile my_profile`, again leaving the credentials fields blank.
 
 1. On startup, the tool will provide a list of existing AWS profiles. Fully configured profiles will show as 'inactive' under the Expiration column, and unconfigured profiles 'n/a'.
-2. Configure your profile with the Azure Tenant ID and App ID URI (see "Getting Your Tenant ID and App ID URI" below). The default Role ARN can be left blank.
+2. Configure your profile with the Azure Tenant ID and App ID URI (see "Getting Your Tenant ID and App ID URI" below).
+    * The default Role ARN can be left blank.
+    * Session Duration must be less than or equal to the maximum configured for the role in the AWS account. Default is 60 minutes.
 3. Save, or Save & Log In.
 
 ## Using
 1. Open the tool, select a profile to log in to, and authenticate with your Azure AD credentials.
 2. On successful login, you will be prompted for a role choice. If desired, save your role choice as the default for future sessions.
 3. Click Assume Role.
-4. The tool will minimize to the system tray and remain active, counting down the 1 hour STS session timeout.
+4. The tool will minimize to the system tray and remain active, counting down until the session timeout.
 5. Click on the system tray icon to open the tool, to log in to other profiles or refresh active profiles.
 6. With 5 minutes remaining in any active session, the main window will re-open to prompt for an authentication refresh.
 
@@ -43,19 +45,14 @@ Your Azure AD system admin should be able to provide you with your Tenant ID and
 8. In the decoded XML output the value of the Issuer tag is the App ID URI.
 
 # Develop
-1. Installation process
-* Check out the source code
-* Run `npm start` in the root directory
-
-2. Build and Test
+1. Build and Test
+* Check out the source code, e.g. `git clone https://github.com/mr-olson/azure-aws-creds.git`
 * First run `npm install` or `npm start` to install NPM packages
 * To debug the entire event loop and application using Visual Studio Code, configure Python for your system and start debugging (Debug -> Start or F5).
 * To debug just the application UI, you can run `npm run debug`
 * To run the application UI, you can run `npm start`
-
-
-3. Package
-* `npm run release` will build OS-specific packages in the dist directory. Ubuntu 17.10 and Windows have been confirmed to work as expected. Cross-compiling contributions welcome!
+2. Package
+* `npm run release` will build OS-specific binary / installable packages in the dist directory. Ubuntu 17.10, Mac and Windows have been confirmed to work. Cross-compiling contributions welcome!
 
 # Contribute
 Pull requests are welcome for features or fixes.
