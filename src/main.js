@@ -66,6 +66,10 @@ const menuTemplate = [
   }
 ];
 
+process.on('uncaughtException', function (error) {
+  showError({message: error});
+});
+
 ipcMain.on("azure-login", (event, profile) => {
   login(profile);
 });
@@ -410,7 +414,7 @@ function getAwsProfile(profile) {
   let profileKey = profile == "default" ? profile : "profile " + profile;
 
   if (!(profileKey in awsConfig))
-    throw "Profile " + profile + "not found in " + awsConfig;
+    throw "Profile '" + profile + "' not found in aws config";
 
   let session = 60;
   if ("azure_session_duration_minutes" in awsConfig[profileKey]) {
