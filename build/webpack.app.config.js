@@ -5,6 +5,7 @@ module.exports = {
   entry: {
     app: './src/main.js'
   },
+  mode: "production",
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js'
