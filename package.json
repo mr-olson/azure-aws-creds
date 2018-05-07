@@ -23,6 +23,9 @@
     "linux": {
       "category": "Utility"
     },
+    "mac": {
+      "icon": "src/AWS.icns"
+    },
     "nsis": {
       "artifactName": "${productName}_${version}_setup.${ext}"
     },
