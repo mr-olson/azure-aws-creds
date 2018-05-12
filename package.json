@@ -1,6 +1,6 @@
 {
   "name": "azure-aws-creds",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Electron app to update AWS credentials via Azure AD federation",
   "main": "src/main.js",
   "bin": "./src/main.js",
@@ -24,13 +24,13 @@
       "category": "Utility"
     },
     "mac": {
-      "icon": "src/AWS.icns"
+      "icon": "src/aac_mac.icns"
     },
     "nsis": {
       "artifactName": "${productName}_${version}_setup.${ext}"
     },
     "win": {
-      "icon": "src/AWS.ico"
+      "icon": "src/aac_win.ico"
     }
   },
   "electronWebpack": {

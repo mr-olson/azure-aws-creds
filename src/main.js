@@ -308,8 +308,15 @@ function createWindow(opts) {
   if (!opts.existingWindow) {
 
     // On Windows the .ico format looks much better, but it breaks Mac
-    let icon = process.platform.startsWith("win") ? "AWS.ico" : "AWS.png";
+    let icon = process.platform.startsWith("win") ? "aac_win.ico" : "aac_icon_large.png";
+    let trayIcon = icon;
+    // Mac likes a smaller tray icon, and won't rescale the larger icon
+    // While Ubuntu doesn't like the small 16x icon in its tray, but will rescale the large one...
+    if (process.platform == "darwin")
+      trayIcon = "aac_icon.png";
+
     let iconpath = path.join(__dirname, icon);
+    let trayIconpath = path.join(__dirname, trayIcon);
 
     mainWindow = new BrowserWindow({ width: 750, height: 650, icon: iconpath });
     // Since this tool is only use to set/refresh credentials, when we open it or it
@@ -318,7 +325,7 @@ function createWindow(opts) {
     const menu = Menu.buildFromTemplate(menuTemplate);
     mainWindow.setMenu(menu);
 
-    let appIcon = new Tray(iconpath);
+    let appIcon = new Tray(trayIconpath);
     let contextMenu = Menu.buildFromTemplate([
       {
         label: 'Show App', click: function () {
