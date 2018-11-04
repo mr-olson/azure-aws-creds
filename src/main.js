@@ -24,7 +24,8 @@ const ini = require('ini');
 const AWS = require("aws-sdk");
 const jwtDecode = require('jwt-decode');
 const uuid = require("uuid");
-const cheerio = require("cheerio");
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
 const sts = new AWS.STS();
 
@@ -362,19 +363,23 @@ function createWindow(opts) {
 }
 
 function parseSAMLToken (samlResponse) {
-  const samlText = new Buffer(samlResponse, 'base64').toString("ascii");
-  const saml = cheerio.load(samlText, { xmlMode: true });
+  const samlText = new Buffer.from(samlResponse, 'base64').toString("ascii");
+  const saml = JSDOM.fragment(samlText);
 
-  const roles = saml("Attribute[Name='https://aws.amazon.com/SAML/Attributes/Role']>AttributeValue").map(function () {
-    const roleAndPrincipal = saml(this).text();
+  let roles = Array();
+  Array.from(saml.querySelectorAll("Attribute[Name='https://aws.amazon.com/SAML/Attributes/Role']>AttributeValue")).forEach((rp) => {
+    const roleAndPrincipal = rp.innerHTML;
     const parts = roleAndPrincipal.split(",");
+    // It's a fatal error if we get something other than 2 parts
+    if (parts.length != 2)
+      throw "Invalid AzureAD configuration. Role,IdP pair '" + roleAndPrincipal + "' - must be a comma-separated set of ARNs."
 
     // Role / Principal claims may be in either order
     const [roleIdx, principalIdx] = parts[0].indexOf(":role/") >= 0 ? [0, 1] : [1, 0];
     const roleArn = parts[roleIdx].trim();
     const principalArn = parts[principalIdx].trim();
-    return { roleArn, principalArn, samlResponse };
-  }).get();
+    roles.push({ roleArn, principalArn, samlResponse });
+  });
 
   // Sort by account ID (effectively)
   // TODO: allow for account aliases & sort by alias string instead
